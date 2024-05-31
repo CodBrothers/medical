@@ -7,7 +7,7 @@ import { Home } from './pages/Home';
 import Doctor from './pages/Doctor';
 import Patients from './pages/Patients';
 import Layout from './Layout';
-
+import { UserContextProvider } from './contexts/UserContextProvider';
 // const router = createBrowserRouter([
 //   {
 //     path: '/',
@@ -46,7 +46,9 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router}></RouterProvider>
+    <UserContextProvider>
+      <RouterProvider router={router}></RouterProvider>
+    </UserContextProvider>
   </React.StrictMode>
 );
 

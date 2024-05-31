@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../index.css" // Ensure this line is included to import Tailwind CSS
 import { login } from "../../services/auth";
+import UserContext from "../../contexts/UserContext";
 export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { setUser } = useContext(UserContext)
     const navigate = useNavigate();
 
     const onSubmit = (e) => {
         e.preventDefault();
         login({ username: email, password: password }).then((res) => {
             navigate("/home");
+            setUser("radhika")
 
         }).catch((err) => {
             navigate("/login");
