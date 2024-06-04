@@ -8,6 +8,7 @@ import Doctor from './pages/Doctor';
 import Patients from './pages/Patients';
 import Layout from './Layout';
 import { UserContextProvider } from './contexts/UserContextProvider';
+import ProtectedRoute from './components/common/ProtectedRoute';
 // const router = createBrowserRouter([
 //   {
 //     path: '/',
@@ -34,10 +35,10 @@ const router = createBrowserRouter(
     <>
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
-      <Route element={<Layout></Layout>} >
-        <Route path="/home" element={<Home />} />
-        <Route path="/doctors" element={<Doctor />} />
-        <Route path="/patients" element={<Patients />} />
+      <Route element={<Layout />} >
+        <Route path="/home" element={<ProtectedRoute element={Home} />} />
+        <Route path="/doctors" element={<ProtectedRoute element={Doctor} />} />
+        <Route path="/patients" element={<ProtectedRoute element={Patients} />} />
       </Route>
     </>
   )

@@ -9,11 +9,21 @@ export const Login = () => {
     const { setUser } = useContext(UserContext)
     const navigate = useNavigate();
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
+        // console.log("hererrererererr")
         e.preventDefault();
-        login({ username: email, password: password }).then((res) => {
-            navigate("/home");
-            setUser("radhika")
+        login({ email: email, password: password }).then((res) => {
+            console.log("vhecllll", res)
+            console.log(res, res.statusCode, "ressss")
+            if (res.statusCode === 200) {
+                console.log("reacheddddd")
+                navigate("/home");
+                setUser(res.data.user.name)
+                localStorage.setItem("token", res.data.token)
+            }
+            else {
+                navigate("/login");
+            }
 
         }).catch((err) => {
             navigate("/login");
