@@ -40,6 +40,8 @@ const router = createBrowserRouter(
         <Route path="/doctors" element={<ProtectedRoute element={Doctor} />} />
         <Route path="/patients" element={<ProtectedRoute element={Patients} />} />
       </Route>
+      <Route path="*" element={<Navigate to="/login" />} />
+
     </>
   )
 )
