@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faUser, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+// import { useState } from 'react';
 const Navbar = () => {
-    const [onClickProfile, setOnClickProfile] = useState(false)
-    const handleProfileClick = () => {
-        setOnClickProfile(!onClickProfile)
-    }
-    const handleLogout = () => {
-        localStorage.removeItem("token")
-    }
+    // const [onClickProfile, setOnClickProfile] = useState(false)
+    // const handleProfileClick = () => {
+    //     setOnClickProfile(!onClickProfile)
+    // }
+    // const handleLogout = () => {
+    //     localStorage.removeItem("token")
+    // }
     return (
         <nav className="bg-blue-500 p-4">
             <div className="container mx-auto flex justify-between items-center">
