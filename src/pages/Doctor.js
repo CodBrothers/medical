@@ -2,7 +2,6 @@ import React, { useContext } from 'react'
 import UserContext from '../contexts/UserContext'
 import Table from '../components/User/Tables'
 import { useNavigate } from 'react-router-dom';
-import Loader from '../components/common/Loader';
 
 export default function Patients() {
     const navigate = useNavigate();
