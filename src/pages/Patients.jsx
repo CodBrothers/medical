@@ -7,7 +7,7 @@ export default function Patients() {
     const navigate = useNavigate();
 
     const handleButtonClick = () => {
-        navigate("/form", { state: { role: "doctor" } });
+        navigate("/form", { state: { role: "patient" } });
     };
 
     const { user } = useContext(UserContext);
@@ -25,7 +25,7 @@ export default function Patients() {
                 </header>
                 <main className="container mx-auto">
                     <div className="p-4 bg-white shadow-lg rounded-lg">
-                        <Table title="Doctors Table" />
+                        <Table title="Patients Table" />
                     </div>
                 </main>
             </div>
