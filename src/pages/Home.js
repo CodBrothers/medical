@@ -1,7 +1,7 @@
 
 import { useContext } from "react"
 import UserContext from "../contexts/UserContext"
-import Table from "../components/common/Tables"
+import Table from "../components/User/Tables"
 export const Home = () => {
     const { user } = useContext(UserContext)
     return (<>
