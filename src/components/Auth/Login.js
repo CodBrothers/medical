@@ -5,16 +5,24 @@ import { login } from "../../services/auth";
 import UserContext from "../../contexts/UserContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Loader from "../common/Loader";
 export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { setUser } = useContext(UserContext)
     const [error, setError] = useState("")
     const [showPassword, setShowPassword] = useState(false)
+    const { loading, setLoading } = useContext(UserContext)
     const navigate = useNavigate();
 
     const onSubmit = async (e) => {
+        console.log(loading, "loadingggggh")
+        setLoading(true)
+        console.log(loading, "afterrrrr")
+
         e.preventDefault();
+        setLoading(true)
+
         login({ email: email, password: password }).then((res) => {
             console.log(res.statusCode)
             if (res.statusCode === 200) {
@@ -32,6 +40,8 @@ export const Login = () => {
             }
 
             navigate("/login");
+        }).finally(() => {
+            setLoading(false)
         })
     };
 
@@ -79,7 +89,7 @@ export const Login = () => {
                         type="submit"
                         className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     >
-                        Login
+                        {loading ? <Loader /> : "Login"}
                     </button>
                 </form>
             </div>

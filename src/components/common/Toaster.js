@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import UserContext from '../../contexts/UserContext';
-
+import "../../index.css"
 const WarningToaster = ({ message, type }) => {
     // const [isVisible, setIsVisible] = useState(true);
     const { isVisible, setIsVisible } = useContext(UserContext)
@@ -8,6 +8,19 @@ const WarningToaster = ({ message, type }) => {
     const handleClose = () => {
         setIsVisible(false);
     };
+    useEffect(() => {
+        if (isVisible) {
+            const handleClickOutside = () => {
+                setIsVisible(false);
+            };
+
+            document.addEventListener('click', handleClickOutside);
+
+            return () => {
+                document.removeEventListener('click', handleClickOutside);
+            };
+        }
+    }, [isVisible, setIsVisible]);
 
     const getClassName = () => {
         if (type === 'error') {
@@ -20,9 +33,8 @@ const WarningToaster = ({ message, type }) => {
 
     return (
         <>
-            {console.log("visisbility", isVisible)}
             {isVisible && (
-                <div className={`${getClassName()} p-4 fixed top-0 left-0 w-full`}>
+                <div className={`fixed top-10 right-5 z-50 p-4 transition-transform transform ${getClassName()} ${isVisible ? 'slide-in' : 'slide-out'}`}>
                     <div className="flex justify-between">
                         <div className="flex items-center">
                             {type === 'error' && <div className="text-lg font-bold mr-2">Error:</div>}

@@ -3,12 +3,13 @@ import { addUserData } from '../../services/auth'
 import WarningToaster from '../common/Toaster'
 import UserContext from '../../contexts/UserContext'
 import { useLocation } from 'react-router-dom';
+import Loader from '../common/Loader';
 
 function Form() {
     const location = useLocation();
     const [message, setMessage] = useState("")
     const [respType, setRespType] = useState("")
-    const { setIsVisible } = useContext(UserContext)
+    const { setIsVisible, loading, setLoading } = useContext(UserContext)
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -22,10 +23,12 @@ function Form() {
     const handleChange = (e) => {
         const { name, value } = e.target
         setFormData({ ...formData, [name]: value })
+        setIsVisible(false)
     }
 
     const onSubmit = async (e) => {
         e.preventDefault()
+        setLoading(true)
         try {
 
             const res = await addUserData(formData)
@@ -43,6 +46,9 @@ function Form() {
             setIsVisible(true)
             setRespType("error")
             setMessage("Something went wrong")
+        }
+        finally {
+            setLoading(false)
         }
 
     }
@@ -130,7 +136,8 @@ function Form() {
                         />
                     </div>
                     <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Add User
+
+                        {loading ? <Loader /> : "Add User"}
                     </button>
                 </form>
             </div>

@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import UserContext from '../contexts/UserContext'
 import Table from '../components/User/Tables'
 import { useNavigate } from 'react-router-dom';
+import Loader from '../components/common/Loader';
 
 export default function Patients() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Patients() {
 
     return (
         <>
+
             <div className="flex flex-col min-h-screen bg-blue-50 p-4">
                 <header className="p-4 mb-8">
                     <div className="container mx-auto flex justify-end items-center">
