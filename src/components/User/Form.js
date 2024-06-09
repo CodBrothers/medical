@@ -1,30 +1,46 @@
 import React, { useContext, useState } from 'react'
-import { addUserData } from '../../services/auth'
+import { addUserData } from '../../services/user'
 import WarningToaster from '../common/Toaster'
 import UserContext from '../../contexts/UserContext'
 import { useLocation } from 'react-router-dom';
 import Loader from '../common/Loader';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 function Form() {
     const location = useLocation();
     const [message, setMessage] = useState("")
     const [respType, setRespType] = useState("")
     const { setIsVisible, loading, setLoading } = useContext(UserContext)
+    const [dob, setDob] = useState(new Date())
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         phoneNumber: "",
         address: "",
-        aadhaarDetails: "",
+        adhar: "",
         role: location.state.role,
         age: "",
+        availability: "",
+        qualification: "",
+        days: "test"
     })
+
 
     const handleChange = (e) => {
         const { name, value } = e.target
         setFormData({ ...formData, [name]: value })
         setIsVisible(false)
     }
+
+
+    const handleDateChange = (e) => {
+        setDob(e)
+        setFormData({ ...formData, age: e })
+        setIsVisible(false)
+    }
+
 
     const onSubmit = async (e) => {
         e.preventDefault()
@@ -35,11 +51,11 @@ function Form() {
             setIsVisible(true)
             if (res.statusCode === 200) {
                 setRespType("success")
-                setMessage("Something went wrong")
+                setMessage(`${formData.role[0].toUpperCase()}${formData.role.slice(1)} Added Successfuly`)
             }
             else {
                 setRespType("error")
-                setMessage("Added Succesfully")
+                setMessage("Something went wrong")
             }
         }
         catch (err) {
@@ -107,8 +123,8 @@ function Form() {
                         <label className="block text-blue-700 text-sm font-bold mb-2">Aadhaar Details</label>
                         <input
                             type="text"
-                            name="aadhaarDetails"
-                            value={formData.aadhaarDetails}
+                            name="adhar"
+                            value={formData.adhar}
                             onChange={handleChange}
                             required
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -126,15 +142,42 @@ function Form() {
                     </div>
                     <div className="mb-4">
                         <label className="block text-blue-700 text-sm font-bold mb-2">Age</label>
-                        <input
-                            type="number"
-                            name="age"
+                        <DatePicker
+                            name='age'
                             value={formData.age}
-                            onChange={handleChange}
-                            required
+                            selected={dob}
+                            onChange={handleDateChange}
+                            dateFormat="yyyy-MM-dd"
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            placeholderText="Select date of birth"
+                            showYearDropdown
+                            showMonthDropdown
+                            dropdownMode='select'
                         />
                     </div>
+                    {location.state.role === "doctor" ? <>
+                        <div className="mb-4">
+                            <label className="block text-blue-700 text-sm font-bold mb-2">Availability</label>
+                            <input
+                                type="text"
+                                name="availability"
+                                value={formData.availability}
+                                onChange={handleChange}
+                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-blue-700 text-sm font-bold mb-2">Qualification</label>
+                            <input
+                                type="text"
+                                name="qualification"
+                                value={formData.qualification}
+                                onChange={handleChange}
+                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            />
+                        </div> </> : ""}
                     <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
 
                         {loading ? <Loader /> : "Add User"}

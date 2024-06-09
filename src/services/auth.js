@@ -10,16 +10,3 @@ export const login = async (data) => {
         throw error;  // Re-throw the error so it can be handled by the caller
     }
 };
-
-export const addUserData = async (data) => {
-    try {
-        console.log("comess 1")
-        const response = await axios.post(`${base_url}/addUserData`, data);
-        console.log("comess 2")
-
-        return response.data;
-    } catch (error) {
-        console.error('Error during login:', error);
-        throw error;  // Re-throw the error so it can be handled by the caller
-    }
-};

@@ -16,15 +16,11 @@ export const Login = () => {
     const navigate = useNavigate();
 
     const onSubmit = async (e) => {
-        console.log(loading, "loadingggggh")
         setLoading(true)
-        console.log(loading, "afterrrrr")
-
         e.preventDefault();
         setLoading(true)
 
         login({ email: email, password: password }).then((res) => {
-            console.log(res.statusCode)
             if (res.statusCode === 200) {
                 navigate("/home");
                 setUser(res.data.user.name)
