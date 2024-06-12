@@ -1,9 +1,13 @@
-import React, { useContext } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import UserContext from '../contexts/UserContext'
 import Table from '../components/User/Tables'
 import { useNavigate } from 'react-router-dom';
+import { getUsers } from '../services/user';
+import WarningToaster from '../components/common/Toaster';
 
 export default function Patients() {
+    const [data, setData] = useState([])
+    const { setLoading, message, setMessage, respType, setRespType } = useContext(UserContext)
     const navigate = useNavigate();
 
     const handleButtonClick = () => {
@@ -11,9 +15,32 @@ export default function Patients() {
     };
 
     const { user } = useContext(UserContext);
+    const getAllUsers = useCallback(async () => {
+        setLoading(true);
+        try {
+            const users = await getUsers({ role: "patient" });
+            if (users.statusCode === 200) {
+                setData(users.data); // Assuming users.data is the array of users
+            }
+            else {
+                setRespType("error")
+                setMessage("Something went wrong")
+            }
+        } catch (error) {
+            setRespType("error")
+            setMessage("Something went wrong")
+        } finally {
+            setLoading(false);
+        }
+    }, [setLoading, setMessage, setRespType]);
+    useEffect(() => {
+        getAllUsers()
+    }, [getAllUsers])
 
     return (
         <>
+            {message && <WarningToaster message={message} type={respType} />}
+
             <div className="flex flex-col min-h-screen bg-blue-50 p-4">
                 <header className="p-4 mb-8">
                     <div className="container mx-auto flex justify-end items-center">
@@ -24,8 +51,9 @@ export default function Patients() {
                     </div>
                 </header>
                 <main className="container mx-auto">
+
                     <div className="p-4 bg-white shadow-lg rounded-lg">
-                        <Table title="Patients Table" />
+                        <Table title="Patients Table" data={data} />
                     </div>
                 </main>
             </div>

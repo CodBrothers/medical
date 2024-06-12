@@ -13,12 +13,6 @@ export const Home = () => {
                 <div className="p-4 bg-white shadow-lg rounded-lg">
                     <Table title="Upcoming Appointments Table" />
                 </div>
-                <div className="p-4 bg-white shadow-lg rounded-lg">
-                    <Table title="Patient Table" />
-                </div>
-                <div className="p-4 bg-white shadow-lg rounded-lg">
-                    <Table title="Doctors Table" />
-                </div>
             </div>
         </div>
     </>)

@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { Home } from "./pages/Home"
 import Doctor from './pages/Doctor';
 import Patients from './pages/Patients';
+import { getUsers } from './services/user';
 function App() {
   return (
     <div className="App">
