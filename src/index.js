@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import { Navigate, Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
 import { Login } from './components/Auth/Login';
-import { Home } from './pages/Home';
+// import { Home } from './pages/Home';
 import Doctor from './pages/Doctor';
 import Patients from './pages/Patients';
 import Layout from './Layout';
@@ -37,7 +37,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
       <Route element={<Layout />} >
-        <Route path="/home" element={<ProtectedRoute element={Home} />} />
+        <Route path="/home" element={<ProtectedRoute element={Doctor} />} />
         <Route path="/doctors" element={<ProtectedRoute element={Doctor} />} />
         <Route path="/patients" element={<ProtectedRoute element={Patients} />} />
         <Route path="/form" element={<ProtectedRoute element={Form} />} />
