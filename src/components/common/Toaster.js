@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import UserContext from '../../contexts/UserContext';
 import "../../index.css"
 const WarningToaster = ({ message, type }) => {
+    console.log("herererer")
     // const [isVisible, setIsVisible] = useState(true);
     const { isVisible, setIsVisible } = useContext(UserContext)
 

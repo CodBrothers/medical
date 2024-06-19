@@ -10,6 +10,7 @@ import Layout from './Layout';
 import { UserContextProvider } from './contexts/UserContextProvider';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Form from './components/User/Form';
+import { Home } from './pages/Home';
 // const router = createBrowserRouter([
 //   {
 //     path: '/',
@@ -37,7 +38,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
       <Route element={<Layout />} >
-        <Route path="/home" element={<ProtectedRoute element={Doctor} />} />
+        <Route path="/home" element={<ProtectedRoute element={Home} />} />
         <Route path="/doctors" element={<ProtectedRoute element={Doctor} />} />
         <Route path="/patients" element={<ProtectedRoute element={Patients} />} />
         <Route path="/form" element={<ProtectedRoute element={Form} />} />

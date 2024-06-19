@@ -1,37 +1,39 @@
-import React, { useContext, useState } from 'react';
-import { addUserData, updateUsers } from '../../services/user';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { addUserData, getUsers, updateUsers } from '../../services/user';
 import WarningToaster from '../common/Toaster';
 import UserContext from '../../contexts/UserContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Loader from '../common/Loader';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { createAppointment } from '../../services/appointment';
 
 const Form = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { setIsVisible, loading, setLoading } = useContext(UserContext);
-
+    const [doctors, setDoctors] = useState([])
+    const appointment = location?.state?.appointment || false;
     const data = location?.state?.data || {};
     const action = location?.state?.action;
     const role = location?.state?.role || data.role || "";
-
+    console.log("appointment", appointment)
     const [message, setMessage] = useState("");
     const [respType, setRespType] = useState("");
-    const [dob, setDob] = useState(new Date());
+    const [dob, setDob] = useState();
     const [formData, setFormData] = useState({
-        name: data.name || "",
-        email: data.email || "",
-        phoneNumber: data.phoneNumber || "",
-        address: data.address || "",
-        adhar: data.adhar || "",
+        name: data.name || data?.userId?.name || "",
+        phoneNumber: data.phoneNumber || data?.userId?.phoneNumber || "",
+        address: data.address || data?.userId?.address || "",
+        adhar: data.adhar || data?.userId?.adhar || "",
         role: role,
-        age: data.age || "",
+        age: data.age || data?.userId?.age || "",
         availability: data.availability || "",
         qualification: data.qualification || "",
-        _id: data._id || undefined
+        _id: data._id || undefined,
+        doctorId: data.doctorId || data?.doctorId?.name || "",
+        appointmentTime: data.appointmentTime || ""
     });
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -44,12 +46,27 @@ const Form = () => {
         setIsVisible(false);
     };
 
+    const handleDateTimeChange = (date) => {
+
+        setFormData({ ...formData, appointmentTime: date });
+    };
+
     const onSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = action ? await updateUsers(formData) : await addUserData(formData);
+            const res = action ? await updateUsers(formData) : appointment ? await createAppointment(formData) : await addUserData(formData);
             handleResponse(res);
+            if (appointment) {
+                navigate("/home")
+            }
+            else if (role === "patient") {
+                navigate("/patients")
+            }
+            else {
+                navigate("/doctors")
+
+            }
         } catch (err) {
             handleError();
         } finally {
@@ -79,6 +96,33 @@ const Form = () => {
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
 
+    const handleOnDropDownChange = (e) => {
+        const { name, value } = e.target;
+        console.log(name, value)
+        setFormData({ ...formData, [name]: value });
+    }
+
+    const getAllDoctors = useCallback(
+        async () => {
+            try {
+                const res = await getUsers({ role: "doctor" })
+                if (res.statusCode === 200) {
+                    setDoctors(res.data)
+                }
+
+            }
+            catch {
+
+            }
+        },
+        [],
+    )
+
+
+    useEffect(() => {
+        getAllDoctors()
+    }, [getAllDoctors])
+
     const renderInput = (label, name, type, disabled = false) => (
         <div className="mb-4">
             <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
@@ -107,9 +151,31 @@ const Form = () => {
         </div>
     );
 
+    const dropdown = ({ label, name, value, onChange, options }) => (
+
+        <div className="mb-4">
+            <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
+            <select
+                name={name}
+                value={formData[value]}
+                onChange={onChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+                <option value="" >Select a doctor</option>
+                {options.doctors.map((option) => (
+                    <option key={option._id} value={option._id}>
+                        {option.name}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+
     const renderDatePicker = (label, name, selected, onChange) => (
         <div className="mb-4">
             <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
+
             <DatePicker
                 name={name}
                 selected={selected}
@@ -124,6 +190,28 @@ const Form = () => {
         </div>
     );
 
+    const renderDateTimePicker = (label, name, selected, onChange) => (
+        <div className="mb-4">
+            <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
+
+            <DatePicker
+                name={name}
+                selected={selected}
+                onChange={onChange}
+                // dateFormat="yyyy-MM-dd"
+                dateFormat="Pp"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholderText="Appointment Time"
+                showYearDropdown
+                showMonthDropdown
+                dropdownMode='select'
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={30}
+            />
+        </div>
+    );
+
     const renderDoctorFields = () => (
         <>
             {renderInput("Availability", "availability", "text")}
@@ -132,20 +220,26 @@ const Form = () => {
     );
     return (
         <div className="mx-auto bg-blue-100 p-8 rounded-lg mt-16 mb-16" style={{ width: '90%' }}>
-            <h2 className="text-2xl font-bold text-blue-700 mb-4">{action ? "Update User" : "Add User"}</h2>
+            <h2 className="text-2xl font-bold text-blue-700 mb-4">{action ? "Update User" : !appointment ? "Add User" : "Create Appointment"}</h2>
             {message && <WarningToaster message={message} type={respType} />}
-            {console.log(role === "doctor", data.role === "doctor")}
             <form onSubmit={onSubmit}>
                 {renderInput("Name", "name", "text")}
-                {renderInput("Email", "email", "email")}
                 {renderInput("Phone Number", "phoneNumber", "tel")}
                 {renderTextarea("Address", "address")}
                 {renderInput("Aadhaar Details", "adhar", "text")}
-                {renderInput("Role", "role", "text", true)}
-                {renderDatePicker("Age", "age", dob, handleDateChange)}
+                {!appointment ? renderInput("Role", "role", "text", true) : ""}
+                {appointment ? dropdown({
+                    label: "Select Doctor",
+                    name: "doctorId",
+                    value: formData.doctorId,
+                    onChange: ((e) => { handleOnDropDownChange(e) }),
+                    options: { doctors }
+                }) : ""}
+                {renderDatePicker("DOB", "age", dob, handleDateChange)}
+                {appointment ? renderDateTimePicker("Appointment", "appointmentTime", formData.appointmentTime, handleDateTimeChange) : ""}
                 {(role === "doctor" || data.role === "doctor") && renderDoctorFields()}
                 <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    {loading ? <Loader /> : action ? "Update User" : "Add User"}
+                    {loading ? <Loader /> : action ? "Update User" : !appointment ? "Add User" : "Create Appointment"}
                 </button>
             </form>
         </div>

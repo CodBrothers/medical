@@ -1,24 +1,91 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { calculateAge } from '../../utils/CalculateAge';
 import UserContext from '../../contexts/UserContext';
 import Loader from '../common/Loader';
 import { useNavigate } from 'react-router-dom';
+import { deleteAppointmentById, getAllAppointments } from '../../services/appointment';
+import { deleteUserById } from '../../services/user';
 
 const Table = ({ title, data }) => {
-    const { loading } = useContext(UserContext)
+    console.log(data.length, data, "data is")
+    const { loading, setLoading, setRespType, setMessage, setIsVisible } = useContext(UserContext)
     const navigate = useNavigate()
-    let patient;
+    let patient = false;
+    let apppointment;
     if (title === "Patients Table") {
         patient = true
+    }
+    if (title === "Upcoming Appointments Table") {
+        apppointment = true
     }
     const columns = patient ? 7 : 12;
 
     const onEdit = (data) => {
-        navigate("/form", { state: { role: data.role, data: data, action: true } })
-    }
-    const onDelete = () => {
+        if (!apppointment) {
+            navigate("/form", { state: { role: data.role, data: data, action: true } })
+        }
+        else {
 
+            navigate("/form", { state: { appointment: true, data: data, action: true } })
+
+        }
     }
+    const onDelete = async (data) => {
+        setLoading(true)
+        try {
+
+            const res = apppointment ? await deleteAppointmentById({ _id: data._id }) : await deleteUserById({ _id: data._id })
+            if (res.statusCode === 200) {
+                setRespType("success");
+                setMessage("Deleted successfully");
+                setIsVisible(true)
+                if (apppointment) {
+                    AllAppointments()
+                }
+
+
+
+            }
+            else {
+                setRespType("error")
+                setMessage("Something went wrong")
+                setIsVisible(true)
+            }
+        }
+        catch {
+            setRespType("error")
+            setMessage("Something went wrong")
+            setIsVisible(true)
+        }
+        finally {
+            setLoading(false)
+
+
+        }
+    }
+
+
+    const AllAppointments = useCallback(async () => {
+        setLoading(true)
+        try {
+            const res = await getAllAppointments()
+            if (res.statusCode === 200) {
+                // data = (res.data)
+
+            }
+            else {
+                setRespType("error")
+                setMessage("Something went wrong")
+            }
+        } catch (error) {
+            setRespType("error")
+            setMessage("Something went wrong")
+        }
+        finally {
+            setLoading(false)
+        }
+    }, [setLoading, setRespType, setMessage])
+
 
     return (
         <div className="w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -39,9 +106,6 @@ const Table = ({ title, data }) => {
                                 Phone Number
                             </th>
                             <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Email
-                            </th>
-                            <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Address
                             </th>
 
@@ -51,12 +115,23 @@ const Table = ({ title, data }) => {
                             <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Age
                             </th>
-                            {!patient ? <>
+                            {!patient && !apppointment ? <>
                                 <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Avalability
                                 </th>
                                 <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Qualification
+                                </th></> : ""}
+
+                            {apppointment ? <>
+                                <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Doctor
+                                </th>
+                                <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Appointment Time
+                                </th>
+                                <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Status
                                 </th></> : ""}
                             <th className="py-2 px-4 bg-blue-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Actions
@@ -65,19 +140,23 @@ const Table = ({ title, data }) => {
                     </thead>
                     {!loading ? (
                         <tbody>
-                            {data.length === 0 ? <tr >
-                                <td colSpan={columns} className="bg-blue-100 py-4 text-center"> No Data Found </td>
-                            </tr> :
+                            {console.log(data, data.length)}
+
+                            {data.length === 0 || data === "No Data Found"
+                                ? <tr >
+                                    < td colSpan={columns} className="bg-blue-100 py-4 text-center"> No Data Found </td>
+                                </tr> :
                                 data.map((item) => (
                                     <tr key={item._id} className="bg-blue-100 border-b border-gray-200">
-                                        <td className="py-2 px-4">{item.name || "-"}</td>
-                                        <td className="py-2 px-4">{item.phoneNumber || "-"}</td>
-                                        <td className="py-2 px-4">{item.email || "-"}</td>
-                                        <td className="py-2 px-4">{item.address || "-"}</td>
+                                        <td className="py-2 px-4">{!apppointment ? item.name : item.userId?.name || "-"}</td>
+                                        <td className="py-2 px-4">{!apppointment ? item.phoneNumber : item.userId?.phoneNumber || "-"}</td>
+                                        <td className="py-2 px-4">{!apppointment ? item.address : item.userId?.address || "-"}</td>
 
-                                        <td className="py-2 px-4">{item.adhar || "-"}</td>
-                                        <td className="py-2 px-4">{calculateAge(item.age) !== undefined ? calculateAge(item.age) : "-"}</td>
-                                        {title !== "Patients Table" ? <>   <td className="py-2 px-4">{item.qualification || "-"}</td>    <td className="py-2 px-4">{item.availability || "-"}</td></> : ""}
+                                        <td className="py-2 px-4">{!apppointment ? item.adhar : item.userId?.adhar || "-"}</td>
+                                        <td className="py-2 px-4">{!apppointment ? calculateAge(item.age) !== undefined && calculateAge(item.age) : calculateAge(item.userId?.age) || "-"}</td>
+                                        {apppointment ? <>   <td className="py-2 px-4">{item?.doctorId?.name || "-"}</td>    <td className="py-2 px-4">{item?.appointmentTime || "-"}</td>  <td className="py-2 px-4">{item?.status || "-"}</td></> : ""}
+
+                                        {!patient && !apppointment ? <>   <td className="py-2 px-4">{item.qualification || "-"}</td>    <td className="py-2 px-4">{item.availability || "-"}</td></> : ""}
                                         <td className="py-2 px-4 flex">
                                             <button
                                                 key={`${item._id}-edit`}
@@ -110,8 +189,8 @@ const Table = ({ title, data }) => {
                         </tbody>
                     )}
                 </table>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

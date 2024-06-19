@@ -35,3 +35,14 @@ export const updateUsers = async (data) => {
         throw error;  // Re-throw the error so it can be handled by the caller
     }
 };
+
+export const deleteUserById = async (data) => {
+    try {
+        const response = await axios.post(`${base_url}/delete-user-data`, data);
+
+        return response.data;
+    } catch (error) {
+        console.error('Error during adding user:', error);
+        throw error;  // Re-throw the error so it can be handled by the caller
+    }
+};
