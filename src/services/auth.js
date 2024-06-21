@@ -1,6 +1,5 @@
 import axios from 'axios';
 const base_url = `${process.env.REACT_APP_BACKEND_BASE_API}/auth`
-// console.log(base_url, "naseurllllll")
 export const login = async (data) => {
     try {
         const response = await axios.post(`${base_url}/login`, data);

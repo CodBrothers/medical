@@ -22,20 +22,28 @@ code {
 @keyframes slideIn {
   0% {
     transform: translateX(100%);
+    opacity: 0;
+    /* Start with opacity 0 */
   }
 
   100% {
     transform: translateX(0);
+    opacity: 1;
+    /* Fully visible */
   }
 }
 
 @keyframes slideOut {
   0% {
     transform: translateX(0);
+    opacity: 1;
+    /* Fully visible */
   }
 
   100% {
     transform: translateX(100%);
+    opacity: 0;
+    /* End with opacity 0 */
   }
 }
 

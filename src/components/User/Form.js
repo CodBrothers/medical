@@ -6,33 +6,33 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Loader from '../common/Loader';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { createAppointment } from '../../services/appointment';
+import { createAppointment, updateAppointmentById } from '../../services/appointment';
+import { calculateAge, capitalize } from '../../utils/CalculateAge';
 
 const Form = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { setIsVisible, loading, setLoading } = useContext(UserContext);
+    const { setIsVisible, loading, setLoading, isVisible, setMessage, message, respType, setRespType } = useContext(UserContext);
     const [doctors, setDoctors] = useState([])
     const appointment = location?.state?.appointment || false;
     const data = location?.state?.data || {};
     const action = location?.state?.action;
     const role = location?.state?.role || data.role || "";
-    console.log("appointment", appointment)
-    const [message, setMessage] = useState("");
-    const [respType, setRespType] = useState("");
-    const [dob, setDob] = useState();
+    // const [message, setMessage] = useState("");
+    // const [respType, setRespType] = useState("");
+    // const [dob, setDob] = useState();
     const [formData, setFormData] = useState({
         name: data.name || data?.userId?.name || "",
         phoneNumber: data.phoneNumber || data?.userId?.phoneNumber || "",
         address: data.address || data?.userId?.address || "",
         adhar: data.adhar || data?.userId?.adhar || "",
         role: role,
-        age: data.age || data?.userId?.age || "",
+        age: (data.age) || (data?.userId?.age) || new Date(),
         availability: data.availability || "",
         qualification: data.qualification || "",
         _id: data._id || undefined,
         doctorId: data.doctorId || data?.doctorId?.name || "",
-        appointmentTime: data.appointmentTime || ""
+        appointmentTime: data.appointmentTime ? new Date(data.appointmentTime) : ""
     });
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -41,13 +41,12 @@ const Form = () => {
     };
 
     const handleDateChange = (date) => {
-        setDob(date);
-        setFormData({ ...formData, age: date });
+        // setDob(date);
+        setFormData({ ...formData, age: (date) });
         setIsVisible(false);
     };
 
     const handleDateTimeChange = (date) => {
-
         setFormData({ ...formData, appointmentTime: date });
     };
 
@@ -55,10 +54,14 @@ const Form = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = action ? await updateUsers(formData) : appointment ? await createAppointment(formData) : await addUserData(formData);
+            const res = action && !appointment ? await updateUsers(formData) : !action && appointment ? await createAppointment(formData) : !action && !appointment ? await addUserData(formData) : await updateAppointmentById(formData)
             handleResponse(res);
             if (appointment) {
+                let msg = action && !appointment ? "User Updated Successfuly" : !action && appointment ? "Appointment Created Successfuly" : !action && !appointment ? "User Created Successfuly" : "Appointment Updated Successfuly"
                 navigate("/home")
+                setRespType("success");
+                setMessage(msg);
+                setIsVisible(true)
             }
             else if (role === "patient") {
                 navigate("/patients")
@@ -71,6 +74,7 @@ const Form = () => {
             handleError();
         } finally {
             setLoading(false);
+
         }
     };
 
@@ -92,13 +96,10 @@ const Form = () => {
         setMessage("Something went wrong");
     };
 
-    const capitalize = (string) => {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    };
 
     const handleOnDropDownChange = (e) => {
+
         const { name, value } = e.target;
-        console.log(name, value)
         setFormData({ ...formData, [name]: value });
     }
 
@@ -153,26 +154,29 @@ const Form = () => {
 
     const dropdown = ({ label, name, value, onChange, options }) => (
 
-        <div className="mb-4">
+
+        < div className="mb-4" >
             <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
             <select
                 name={name}
-                value={formData[value]}
+                value={value._id}
+                // value="ertyui"
                 onChange={onChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
-                <option value="" >Select a doctor</option>
+                <option value="">Select a doctor</option>
                 {options.doctors.map((option) => (
                     <option key={option._id} value={option._id}>
                         {option.name}
                     </option>
                 ))}
             </select>
-        </div>
+        </div >
     );
 
     const renderDatePicker = (label, name, selected, onChange) => (
+
         <div className="mb-4">
             <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
 
@@ -186,14 +190,15 @@ const Form = () => {
                 showYearDropdown
                 showMonthDropdown
                 dropdownMode='select'
+            // value={formData.age}
             />
         </div>
     );
 
     const renderDateTimePicker = (label, name, selected, onChange) => (
         <div className="mb-4">
-            <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
 
+            <label className="block text-blue-700 text-sm font-bold mb-2">{label}</label>
             <DatePicker
                 name={name}
                 selected={selected}
@@ -235,7 +240,7 @@ const Form = () => {
                     onChange: ((e) => { handleOnDropDownChange(e) }),
                     options: { doctors }
                 }) : ""}
-                {renderDatePicker("DOB", "age", dob, handleDateChange)}
+                {renderDatePicker("DOB", "age", formData.age ? formData.age : formData.userId.age, handleDateChange)}
                 {appointment ? renderDateTimePicker("Appointment", "appointmentTime", formData.appointmentTime, handleDateTimeChange) : ""}
                 {(role === "doctor" || data.role === "doctor") && renderDoctorFields()}
                 <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">

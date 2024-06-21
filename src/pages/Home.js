@@ -41,7 +41,7 @@ export const Home = () => {
     return (<>
         {message && <WarningToaster message={message} type={respType} />}
 
-        <div className="flex flex-col items-center justify-center min-h-screen bg-blue-50 p-4">
+        <div className="flex flex-col min-h-screen bg-blue-50 p-4">
             <header className="p-4 mb-8">
                 <div className="container mx-auto flex justify-end items-center">
                     <button onClick={handleButtonClick} className="bg-white text-blue-500 hover:bg-blue-700 hover:text-white font-bold py-2 px-4 rounded">
@@ -51,7 +51,7 @@ export const Home = () => {
             </header>
             <div className="space-y-8 w-full">
                 <div className="p-4 bg-white shadow-lg rounded-lg">
-                    <Table title="Upcoming Appointments Table" data={data} />
+                    <Table title="Upcoming Appointments Table" initialData={data} />
                 </div>
             </div>
         </div>

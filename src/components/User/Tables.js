@@ -1,14 +1,24 @@
-import React, { useCallback, useContext } from 'react';
-import { calculateAge } from '../../utils/CalculateAge';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { calculateAge, capitalize, formatDate } from '../../utils/CalculateAge';
 import UserContext from '../../contexts/UserContext';
 import Loader from '../common/Loader';
 import { useNavigate } from 'react-router-dom';
-import { deleteAppointmentById, getAllAppointments } from '../../services/appointment';
-import { deleteUserById } from '../../services/user';
+import { deleteAppointmentById, getAllAppointments, updateAppointmentById } from '../../services/appointment';
+import { deleteUserById, getUsers } from '../../services/user';
+import WarningToaster from '../common/Toaster';
+import "../../styles/Table.css"
+import DatePicker from 'react-datepicker';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit } from '@fortawesome/free-solid-svg-icons';
 
-const Table = ({ title, data }) => {
-    console.log(data.length, data, "data is")
-    const { loading, setLoading, setRespType, setMessage, setIsVisible } = useContext(UserContext)
+const Table = ({ title, initialData }) => {
+    const { loading, setLoading, setRespType, setMessage, setIsVisible, message, respType, isVisible } = useContext(UserContext)
+    const [data, setData] = useState(initialData)
+    const [editCellId, setEditCellId] = useState(null);
+    const [editTimeCellId, setEditTimeCellId] = useState(null);
+
+    const [statusValue, setStatusValue] = useState("pending");
+    const [aptTime, setAptTime] = useState(new Date())
     const navigate = useNavigate()
     let patient = false;
     let apppointment;
@@ -30,20 +40,80 @@ const Table = ({ title, data }) => {
 
         }
     }
+
+    const handleCellClick = (item) => {
+        setEditCellId(item._id);
+
+    };
+
+    const handleTimeCellClick = (item) => {
+        setEditTimeCellId(item._id);
+
+    };
+
+    const handleStatusChange = async (event) => {
+        let send = {
+            _id: editCellId,
+        }
+        if (event?.target) {
+            event.preventDefault();
+            send.status = event.target.value;
+        } else {
+            send._id = editTimeCellId
+            send.appointmentTime = event;
+        }
+
+
+        await handleSaveStatus(send)
+        if (event.target) {
+            setStatusValue(event.target.value)
+        }
+        else {
+            setAptTime(event)
+        }
+
+        setEditCellId(null);
+    };
+
+    const handleSaveStatus = async (item) => {
+        setLoading(true);
+        try {
+            const res = await updateAppointmentById(item); // Assuming you have this endpoint
+            if (res.statusCode === 200) {
+                setRespType("success");
+                setMessage("Status updated successfully");
+                setIsVisible(true);
+                setData(prevData =>
+                    prevData.map(dataItem =>
+                        dataItem._id === item._id ? { ...dataItem, status: statusValue } : dataItem
+                    )
+                );
+            } else {
+                setRespType("error");
+                setMessage("Something went wrong");
+                setIsVisible(true);
+            }
+        } catch (error) {
+            setRespType("error");
+            setMessage("Something went wrong");
+            setIsVisible(true);
+        } finally {
+            setLoading(false);
+            setEditCellId(null);
+            setEditTimeCellId(null);
+            setStatusValue('');
+        }
+    };
+
     const onDelete = async (data) => {
         setLoading(true)
         try {
-
             const res = apppointment ? await deleteAppointmentById({ _id: data._id }) : await deleteUserById({ _id: data._id })
             if (res.statusCode === 200) {
-                setRespType("success");
-                setMessage("Deleted successfully");
                 setIsVisible(true)
-                if (apppointment) {
-                    AllAppointments()
-                }
-
-
+                setRespType("success");
+                setMessage(res.data);
+                AllAppointments()
 
             }
             else {
@@ -68,9 +138,9 @@ const Table = ({ title, data }) => {
     const AllAppointments = useCallback(async () => {
         setLoading(true)
         try {
-            const res = await getAllAppointments()
+            const res = apppointment ? await getAllAppointments() : patient ? await getUsers({ role: "patient" }) : await getUsers({ role: "doctor" })
             if (res.statusCode === 200) {
-                // data = (res.data)
+                setData(res.data)
 
             }
             else {
@@ -84,12 +154,18 @@ const Table = ({ title, data }) => {
         finally {
             setLoading(false)
         }
-    }, [setLoading, setRespType, setMessage])
+    }, [setLoading, setRespType, setMessage,])
+
+    useEffect(() => {
+        AllAppointments()
+    }, [AllAppointments, apppointment, statusValue, aptTime])
 
 
     return (
         <div className="w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="bg-blue-200 text-gray-600 text-xs font-semibold uppercase tracking-wider p-4">
+            {message && <WarningToaster message={message} type={respType} />}
+
+            <div className="bg-blue-200 text-blue-800 text-xl font-semibold uppercase tracking-wider p-4">
                 {title}
                 {/* Patient */}
             </div>
@@ -140,7 +216,6 @@ const Table = ({ title, data }) => {
                     </thead>
                     {!loading ? (
                         <tbody>
-                            {console.log(data, data.length)}
 
                             {data.length === 0 || data === "No Data Found"
                                 ? <tr >
@@ -154,17 +229,72 @@ const Table = ({ title, data }) => {
 
                                         <td className="py-2 px-4">{!apppointment ? item.adhar : item.userId?.adhar || "-"}</td>
                                         <td className="py-2 px-4">{!apppointment ? calculateAge(item.age) !== undefined && calculateAge(item.age) : calculateAge(item.userId?.age) || "-"}</td>
-                                        {apppointment ? <>   <td className="py-2 px-4">{item?.doctorId?.name || "-"}</td>    <td className="py-2 px-4">{item?.appointmentTime || "-"}</td>  <td className="py-2 px-4">{item?.status || "-"}</td></> : ""}
+                                        {apppointment ? <>
+                                            <td className="py-2 px-4">
+                                                {item?.doctorId?.name || "-"}
+                                            </td>
+                                            <td className="py-2 px-4">
+                                                {editTimeCellId === item._id ? (
+
+                                                    <DatePicker
+                                                        name="appointmentTime"
+                                                        selected={new Date(item.appointmentTime)}
+                                                        onChange={(e) => handleStatusChange(e, item)}
+                                                        // dateFormat="yyyy-MM-dd"
+                                                        dateFormat="Pp"
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                                        placeholderText="Appointment Time"
+                                                        showYearDropdown
+                                                        showMonthDropdown
+                                                        dropdownMode='select'
+                                                        showTimeSelect
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={30}
+                                                    />
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleTimeCellClick(item)}
+                                                        className="editable-button"
+
+                                                    >
+                                                        {item?.appointmentTime ? formatDate(item?.appointmentTime) : "-"}
+                                                        <span><FontAwesomeIcon icon={faEdit} /></span>
+
+                                                    </button>
+                                                )}
+                                            </td>
+                                            <td className="py-2 px-4">
+                                                {editCellId === item._id ? (
+                                                    <select
+                                                        value={statusValue}
+                                                        onChange={(e) => handleStatusChange(e, item)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                                    >
+                                                        <option value="pending">Pending</option>
+                                                        <option value="accepted">Accepted</option>
+                                                        <option value="done">Done</option>
+                                                    </select>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleCellClick(item)}
+                                                        className="editable-button"
+
+                                                    >
+                                                        {capitalize(item.status) || "-"}
+                                                        <span><FontAwesomeIcon icon={faEdit} /></span>
+                                                    </button>
+                                                )}
+                                            </td></> : ""}
 
                                         {!patient && !apppointment ? <>   <td className="py-2 px-4">{item.qualification || "-"}</td>    <td className="py-2 px-4">{item.availability || "-"}</td></> : ""}
                                         <td className="py-2 px-4 flex">
-                                            <button
+                                            {!apppointment ? <button
                                                 key={`${item._id}-edit`}
                                                 className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded mr-2 my-2"
                                                 onClick={() => onEdit(item)}
                                             >
                                                 Edit
-                                            </button>
+                                            </button> : ""}
                                             <button
                                                 key={`${item._id}-delete`}
                                                 className="bg-blue-700 hover:bg-blue-800 text-white py-1 px-2 rounded my-2"

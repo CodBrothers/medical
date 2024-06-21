@@ -55,7 +55,7 @@ export default function Patients() {
                 </header>
                 <main className="container mx-auto">
                     <div className="p-4 bg-white shadow-lg rounded-lg">
-                        <Table title="Doctors Table" data={data} />
+                        <Table title="Doctors Table" initialData={data} />
                     </div>
                 </main>
             </div>
