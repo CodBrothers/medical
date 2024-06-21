@@ -154,7 +154,7 @@ const Table = ({ title, initialData }) => {
         finally {
             setLoading(false)
         }
-    }, [setLoading, setRespType, setMessage,])
+    }, [setLoading, setRespType, setMessage, apppointment, patient])
 
     useEffect(() => {
         AllAppointments()
