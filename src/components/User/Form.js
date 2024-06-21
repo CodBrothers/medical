@@ -7,12 +7,12 @@ import Loader from '../common/Loader';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { createAppointment, updateAppointmentById } from '../../services/appointment';
-import { calculateAge, capitalize } from '../../utils/CalculateAge';
+import { capitalize } from '../../utils/CalculateAge';
 
 const Form = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { setIsVisible, loading, setLoading, isVisible, setMessage, message, respType, setRespType } = useContext(UserContext);
+    const { setIsVisible, loading, setLoading, setMessage, message, respType, setRespType } = useContext(UserContext);
     const [doctors, setDoctors] = useState([])
     const appointment = location?.state?.appointment || false;
     const data = location?.state?.data || {};

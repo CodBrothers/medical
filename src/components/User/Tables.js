@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
 
 const Table = ({ title, initialData }) => {
-    const { loading, setLoading, setRespType, setMessage, setIsVisible, message, respType, isVisible } = useContext(UserContext)
+    const { loading, setLoading, setRespType, setMessage, setIsVisible, message, respType } = useContext(UserContext)
     const [data, setData] = useState(initialData)
     const [editCellId, setEditCellId] = useState(null);
     const [editTimeCellId, setEditTimeCellId] = useState(null);
