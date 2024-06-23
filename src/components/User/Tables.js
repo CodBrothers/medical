@@ -14,7 +14,7 @@ import ConfirmationModal from '../common/Confirmation';
 import "../../styles/Confirmation.css"
 
 const Table = ({ title, initialData }) => {
-    const { loading, setLoading, setRespType, setMessage, setIsVisible, message, respType, isOpen, setIsOpen } = useContext(UserContext)
+    const { loading, setLoading, setRespType, setMessage, setIsVisible, message, respType } = useContext(UserContext)
     const [data, setData] = useState(initialData)
     const [editCellId, setEditCellId] = useState(null);
     const [editTimeCellId, setEditTimeCellId] = useState(null);
