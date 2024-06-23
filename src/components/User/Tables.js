@@ -354,7 +354,7 @@ const Table = ({ title, initialData }) => {
                     isOpen={isModalOpen}
                     onRequestClose={handleCancelDelete}
                     onConfirm={handleConfirmDelete}
-                    message="Are you sure you want to delete this item?"
+                    message="Are you sure you want to delete?"
                 />
             </div >
         </div >
