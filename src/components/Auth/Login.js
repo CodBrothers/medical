@@ -12,14 +12,16 @@ export const Login = () => {
     const { setUser } = useContext(UserContext)
     const [error, setError] = useState("")
     const [showPassword, setShowPassword] = useState(false)
-    const { loading, setLoading } = useContext(UserContext)
+    const { loading, setLoading, isDisabled, setIsDisabled } = useContext(UserContext)
+
     const navigate = useNavigate();
 
     const onSubmit = async (e) => {
-        setLoading(true)
+
+
         e.preventDefault();
         setLoading(true)
-
+        setIsDisabled(true)
         login({ email: email, password: password }).then((res) => {
             if (res.statusCode === 200) {
                 navigate("/home");
@@ -38,6 +40,7 @@ export const Login = () => {
             navigate("/login");
         }).finally(() => {
             setLoading(false)
+            setIsDisabled(false)
         })
     };
 
@@ -68,12 +71,14 @@ export const Login = () => {
                     <div className="mb-4 relative">
                         <label className="block text-blue-700 text-sm font-bold mb-2">Password</label>
                         <div className="relative w-full">
+                            {console.log("isDisabled", isDisabled)}
                             <input
                                 type={!showPassword ? "password" : "text"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400`}
+
                             />
                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onClick={onToggle}>
                                 <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="text-blue-700" />
@@ -83,7 +88,8 @@ export const Login = () => {
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline "
+                        disabled={isDisabled}
                     >
                         {loading ? <Loader /> : "Login"}
                     </button>

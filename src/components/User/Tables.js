@@ -10,12 +10,16 @@ import "../../styles/Table.css"
 import DatePicker from 'react-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import ConfirmationModal from '../common/Confirmation';
+import "../../styles/Confirmation.css"
 
 const Table = ({ title, initialData }) => {
-    const { loading, setLoading, setRespType, setMessage, setIsVisible, message, respType } = useContext(UserContext)
+    const { loading, setLoading, setRespType, setMessage, setIsVisible, message, respType, isOpen, setIsOpen } = useContext(UserContext)
     const [data, setData] = useState(initialData)
     const [editCellId, setEditCellId] = useState(null);
     const [editTimeCellId, setEditTimeCellId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
 
     const [statusValue, setStatusValue] = useState("pending");
     const [aptTime, setAptTime] = useState(new Date())
@@ -40,7 +44,18 @@ const Table = ({ title, initialData }) => {
 
         }
     }
-
+    const getStatusClass = (status) => {
+        switch (status) {
+            case 'pending':
+                return 'status-pending';
+            case 'accepted':
+                return 'status-accepted';
+            case 'done':
+                return 'status-done';
+            default:
+                return '';
+        }
+    };
     const handleCellClick = (item) => {
         setEditCellId(item._id);
 
@@ -105,6 +120,21 @@ const Table = ({ title, initialData }) => {
         }
     };
 
+    const handleDeleteClick = (item) => {
+        setItemToDelete(item);
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        setIsModalOpen(false);
+        onDelete(itemToDelete)
+    };
+
+    const handleCancelDelete = () => {
+        setIsModalOpen(false);
+        setItemToDelete(null);
+    };
+
     const onDelete = async (data) => {
         setLoading(true)
         try {
@@ -113,7 +143,7 @@ const Table = ({ title, initialData }) => {
                 setIsVisible(true)
                 setRespType("success");
                 setMessage(res.data);
-                AllAppointments()
+
 
             }
             else {
@@ -129,7 +159,7 @@ const Table = ({ title, initialData }) => {
         }
         finally {
             setLoading(false)
-
+            AllAppointments()
 
         }
     }
@@ -250,6 +280,7 @@ const Table = ({ title, initialData }) => {
                                                         showTimeSelect
                                                         timeFormat="HH:mm"
                                                         timeIntervals={30}
+                                                        minDate={new Date()}
                                                     />
                                                 ) : (
                                                     <button
@@ -277,7 +308,7 @@ const Table = ({ title, initialData }) => {
                                                 ) : (
                                                     <button
                                                         onClick={() => handleCellClick(item)}
-                                                        className="editable-button"
+                                                        className={`editable-button ${getStatusClass(item.status)}`}
 
                                                     >
                                                         {capitalize(item.status) || "-"}
@@ -286,7 +317,7 @@ const Table = ({ title, initialData }) => {
                                                 )}
                                             </td></> : ""}
 
-                                        {!patient && !apppointment ? <>   <td className="py-2 px-4">{item.qualification || "-"}</td>    <td className="py-2 px-4">{item.availability || "-"}</td></> : ""}
+                                        {!patient && !apppointment ? <>     <td className="py-2 px-4">{item.availability || "-"}</td> <td className="py-2 px-4">{item.qualification || "-"}</td>  </> : ""}
                                         <td className="py-2 px-4 flex">
                                             {!apppointment ? <button
                                                 key={`${item._id}-edit`}
@@ -298,7 +329,7 @@ const Table = ({ title, initialData }) => {
                                             <button
                                                 key={`${item._id}-delete`}
                                                 className="bg-blue-700 hover:bg-blue-800 text-white py-1 px-2 rounded my-2"
-                                                onClick={() => onDelete(item)}
+                                                onClick={() => handleDeleteClick(item)}
                                             >
                                                 Delete
                                             </button>
@@ -319,6 +350,12 @@ const Table = ({ title, initialData }) => {
                         </tbody>
                     )}
                 </table>
+                <ConfirmationModal
+                    isOpen={isModalOpen}
+                    onRequestClose={handleCancelDelete}
+                    onConfirm={handleConfirmDelete}
+                    message="Are you sure you want to delete this item?"
+                />
             </div >
         </div >
     );

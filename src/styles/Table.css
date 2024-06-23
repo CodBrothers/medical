@@ -31,10 +31,12 @@
 }
 
 .editable-button:hover {
-    background-color: #0056b3;
+    /* background-color: #0056b3; */
     /* Darker blue on hover */
-    border-color: #343a40;
+    /* border-color: #343a40; */
+    opacity: 0.8;
     /* Darker border on hover */
+    /* box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); */
 }
 
 .editable-button:focus {
@@ -48,3 +50,44 @@
     margin-left: 0.5rem;
     /* Space between text and icon */
 }
+
+.status-pending {
+    background-color: #cfe8fc;
+    /* Soft Blue */
+    color: #004080;
+    /* Darker Blue for contrast */
+}
+
+.status-accepted {
+    background-color: #007bff;
+    /* Soft Green */
+    color: #ffffff;
+    /* Darker Green for contrast */
+}
+
+.status-done {
+    background-color: #90caf9;
+    /* Medium Blue */
+    color: #0d47a1;
+    /* Darker Blue for contrast */
+}
+
+
+/* .editable-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.editable-button span {
+    margin-left: 0.5rem;
+}
+
+.editable-button:hover {
+    opacity: 0.8;
+} */

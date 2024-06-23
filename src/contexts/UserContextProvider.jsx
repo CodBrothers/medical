@@ -9,10 +9,11 @@ export const UserContextProvider = ({ children }) => {
     const [respType, setRespType] = useState("")
     const [error, setError] = useState("")
     const [message, setMessage] = useState("")
+    const [isDisabled, setIsDisabled] = useState(false)
 
     // multiple props we can use
     return (
-        <UserContext.Provider value={{ user, setUser, theme, setTheme, isVisible, setIsVisible, loading, setLoading, error, setError, respType, setRespType, message, setMessage }}>
+        <UserContext.Provider value={{ user, setUser, theme, setTheme, isVisible, setIsVisible, loading, setLoading, error, setError, respType, setRespType, message, setMessage, isDisabled, setIsDisabled }}>
             {children}
         </UserContext.Provider>
     );
